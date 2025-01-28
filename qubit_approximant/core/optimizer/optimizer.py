@@ -228,14 +228,17 @@ class AdamOptimizer(GDOptimizer):
     def step(self, grad_cost: Callable, params: NDArray) -> NDArray:
         """Update the parameters with a step of Adam. Adam changes the step
         size in each iteration."""
-        m = zeros_like(params)
-        v = zeros_like(params)
+
+        if self.iter_index == 0:
+            self.m = zeros_like(params)
+            self.v = zeros_like(params)
+
         grad = grad_cost(params)
 
-        m = self.beta1 * m + (1.0 - self.beta1) * grad
-        v = self.beta2 * v + (1.0 - self.beta2) * grad**2
-        mhat = m / (1.0 - self.beta1 ** (self.iter_index + 1))
-        vhat = v / (1.0 - self.beta2 ** (self.iter_index + 1))
+        self.m = self.beta1 * self.m + (1.0 - self.beta1) * grad
+        self.v = self.beta2 * self.v + (1.0 - self.beta2) * grad**2
+        mhat = self.m / (1.0 - self.beta1 ** (self.iter_index + 1))
+        vhat = self.v / (1.0 - self.beta2 ** (self.iter_index + 1))
         params = params - self.step_size * mhat / (sqrt(vhat) + self.eps)
 
         return params
